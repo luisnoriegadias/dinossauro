@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dino Game Clone</title>
+    <style>
+        body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f7f7f7; font-family: 'Courier New', Courier, monospace; overflow: hidden; }
+        #gameContainer { width: 600px; height: 200px; border-bottom: 2px solid #535353; position: relative; background-color: white; overflow: hidden; }
+        #dino { width: 40px; height: 43px; position: absolute; bottom: 0; left: 50px; background-color: #535353; }
+        .cactus { width: 20px; height: 40px; position: absolute; bottom: 0; right: -20px; background-color: #ff4d4d; }
+        #score { position: absolute; top: 10px; right: 20px; font-size: 20px; color: #535353; }
+    </style>
+</head>
+<body>
+
+    <div id="gameContainer">
+        <div id="score">0</div>
+        <div id="dino"></div>
+    </div>
+
+    <script>
+        const dino = document.getElementById("dino");
+        const gameContainer = document.getElementById("gameContainer");
+        const scoreElement = document.getElementById("score");
+        let isJumping = false;
+        let score = 0;
+        let gameActive = true;
+
+        // Salto del dinosaurio
+        function jump() {
+            if (isJumping) return;
+            isJumping = true;
+            let position = 0;
+            
+            let upInterval = setInterval(() => {
+                if (position >= 100) {
+                    clearInterval(upInterval);
+                    let downInterval = setInterval(() => {
+                        if (position <= 0) {
+                            clearInterval(downInterval);
+                            isJumping = false;
+                        }
+                        position -= 5;
+                        dino.style.bottom = position + "px";
+                    }, 20);
+                }
+                position += 5;
+                dino.style.bottom = position + "px";
+            }, 20);
+        }
+
+        // Crear obstáculos (cactus)
+        function createCactus() {
+            if (!gameActive) return;
+            const cactus = document.createElement("div");
+            cactus.classList.add("cactus");
+            gameContainer.appendChild(cactus);
+
+            let cactusPosition = 600;
+            let timer = setInterval(() => {
+                // Colisión
+                if (cactusPosition > 50 && cactusPosition < 90 && parseInt(dino.style.bottom) < 40) {
+                    clearInterval(timer);
+                    gameActive = false;
+                    alert("¡Game Over! Puntuación: " + score);
+                    location.reload();
+                }
+
+                cactusPosition -= 7;
+                cactus.style.left = cactusPosition + "px";
+
+                if (cactusPosition < -20) {
+                    clearInterval(timer);
+                    gameContainer.removeChild(cactus);
+                    score++;
+                    scoreElement.innerText = score;
+                }
+            }, 20);
+
+            setTimeout(createCactus, Math.random() * (2000 - 700) + 700);
+        }
+
+        // Control de teclado
+        document.addEventListener("keydown", (event) => {
+            if (event.code === "Space") {
+                jump();
+            }
+        });
+
+        createCactus();
+    </script>
+</body>
+</html>
